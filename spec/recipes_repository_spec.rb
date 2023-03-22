@@ -26,4 +26,22 @@ RSpec.describe RecipeRepository do
         expect(recipes[1].cooking_time).to eq '30:00'
         expect(recipes[1].rating).to eq '9'
     end
+
+    it "returns a specific recipe" do
+        repo = RecipeRepository.new
+
+        recipe = repo.find(1)
+
+        expect(recipe.id).to eq '1'
+        expect(recipe.recipe_name).to eq 'Aubergine Curry'
+        expect(recipe.cooking_time).to eq '40:00'
+        expect(recipe.rating).to eq '8'
+
+        recipe = repo.find(2)
+
+        expect(recipe.id).to eq  '2'
+        expect(recipe.recipe_name).to eq  'Fennel Pasta'
+        expect(recipe.cooking_time).to eq '30:00'
+        expect(recipe.rating).to eq '9'
+    end
 end
