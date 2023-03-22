@@ -37,32 +37,18 @@ CREATE TABLE recipes (
 );
 ```
 
-## 2. Create Test SQL seeds
+## 2. The test SQL seeds
 
 Your tests will depend on data stored in PostgreSQL to run.
 
 If seed data is provided (or you already created it), you can skip this step.
 
 ```sql
--- EXAMPLE
--- (file: spec/seeds_{table_name}.sql)
+TRUNCATE TABLE recipes RESTART IDENTITY;
 
--- Write your SQL seed here. 
-
--- First, you'd need to truncate the table - this is so our table is emptied between each test run,
--- so we can start with a fresh state.
--- (RESTART IDENTITY resets the primary key)
-
-TRUNCATE TABLE students RESTART IDENTITY; -- replace with your own table name.
-
--- Below this line there should only be `INSERT` statements.
--- Replace these statements with your own seed data.
-
-INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
-INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+INSERT INTO recipes (recipe_name, cooking_time, rating) VALUES ('Aubergine Curry', '40:00' 8);
+INSERT INTO recipes (recipe_name, cooking_time, rating) VALUES ('Fennel Pasta', '30:00' 9);
 ```
-
-Run this SQL file on the database to truncate (empty) the table, and insert the seed data. Be mindful of the fact any existing records in the table will be deleted.
 
 ```bash
 psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
@@ -70,166 +56,52 @@ psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
 
 ## 3. The classes
 
-Usually, the Model class name will be the capitalised table name (single instead of plural). The same name is then suffixed by `Repository` for the Repository class name.
-
 ```ruby
 # EXAMPLE
 # Table name: students
 
 # Model class
 # (in lib/album.rb)
-class Album
+class Recipe
     attr_accessor :id, :title, :release_year, :artist_id
 end
 
 # Repository class
 # (in lib/albums_repository.rb)
-class AlbumRepository
+class RecipeRepository
     # Selecting all records
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, title, release_year, artist_id FROM albums;
+    # SELECT id, recipe_name, cooking_time, rating FROM recipes;
 
-    # Returns an array of album objects.
+    # Returns an array of recipe objects.
   end
 
   # Gets a single record by its ID
   # One argument: the id (number)
   def find(id)
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
+    # SELECT id, recipe_name, cooking_time, rating FROM rating WHERE id = $1;
 
-    # Returns a single Student object.
+    # Returns a single Recipe object.
   end
-
-  # Add more methods below for each operation you'd like to implement.
-
-  # def create(album)
-  # end
-
-  # def update(album)
-  # end
-
-  # def delete(album)
-  # end
-end
-
-# Model class
-# (in lib/artist.rb)
-class Artist
-    attr_accessor :id, :name, :genre
-end
-
-# Repository class
-# (in lib/artists_repository.rb)
-class ArtistsRepository
-    # Selecting all records
-  # No arguments
-  def all
-    # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students;
-
-    # Returns an array of Student objects.
-  end
-
-  # Gets a single record by its ID
-  # One argument: the id (number)
-  def find(id)
-    # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
-
-    # Returns a single Student object.
-  end
-
-  # Add more methods below for each operation you'd like to implement.
-
-  # def create(student)
-  # end
-
-  # def update(student)
-  # end
-
-  # def delete(student)
-  # end
 end
 ```
 
-## 4. Implement the Model class
+## 4. The Model class
 
 Define the attributes of your Model class. You can usually map the table columns to the attributes of the class, including primary and foreign keys.
 
 ```ruby
-# EXAMPLE
-# Table name: students
-
-# Model class
-# (in lib/student.rb)
-
-class Student
+class Recipe
 
   # Replace the attributes by your own columns.
-  attr_accessor :id, :name, :cohort_name
-end
-
-# The keyword attr_accessor is a special Ruby feature
-# which allows us to set and get attributes on an object,
-# here's an example:
-#
-# student = Student.new
-# student.name = 'Jo'
-# student.name
-```
-
-*You may choose to test-drive this class, but unless it contains any more logic than the example above, it is probably not needed.*
-
-## 5. Define the Repository Class interface
-
-Your Repository class will need to implement methods for each "read" or "write" operation you'd like to run against the database.
-
-Using comments, define the method signatures (arguments and return value) and what they do - write up the SQL queries that will be used by each method.
-
-```ruby
-# EXAMPLE
-# Table name: students
-
-# Repository class
-# (in lib/student_repository.rb)
-
-class StudentRepository
-
-  # Selecting all records
-  # No arguments
-  def all
-    # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students;
-
-    # Returns an array of Student objects.
-  end
-
-  # Gets a single record by its ID
-  # One argument: the id (number)
-  def find(id)
-    # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
-
-    # Returns a single Student object.
-  end
-
-  # Add more methods below for each operation you'd like to implement.
-
-  # def create(student)
-  # end
-
-  # def update(student)
-  # end
-
-  # def delete(student)
-  # end
+  attr_accessor :id, :recipe_name, :cooking_time, :rating
 end
 ```
 
-## 6. Write Test Examples
+## 5. Test Examples
 
 Write Ruby code that defines the expected behaviour of the Repository class, following your design from the table written in step 5.
 
@@ -239,58 +111,44 @@ These examples will later be encoded as RSpec tests.
 # EXAMPLES
 
 # 1
-# Get all students
+# Get all recipes
 
-album_repo = AlbumRepository.new
+repo = RecipeRepository.new
 
-albums = album_repo.all
+recipes = repo.all
 
-albums.length # =>  2
+recipes.length # =>  2
 
-albums[0].id # =>  1
-albums[0].title # =>  'Surfer Rosa'
-albums[0].release_year # =>  1988
-albums[0].artist_id # => 1
+recipes[0].id # =>  1
+recipes[0].recipe_name # =>  'Aubergine Curry'
+recipes[0].cooking_time # =>  '40:00'
+recipes[0].rating # => 8
 
-albums[1].id # =>  2
-albums[1].title # =>  'Waterloo'
-albums[1].release_year # =>  1972
-albums[1].artist_id # => 2
+recipes[1].id # =>  2
+recipes[1].recipe_name # =>  'Fennel Pasta'
+recipes[1].cooking_time # => '30:00'
+recipes[1].rating # => 9
 
 # 2
 # Get a single album
 
-album_repo = AlbumsRepository.new
+repo = RecipeRepository.new
 
-album = album_repo.find(1)
+recipe = repo.find(1)
 
-album.id # =>  1
-album.name # =>  'Surfer Rosa'
-album.release_year # =>  1988
-album.artist_id # => 1
+recipe.id # =>  1
+recipe.recipe_name # =>  'Aubergine Curry'
+recipe.cooking_time # =>  '40:00'
+recipe.rating # => 8
 
+repo = RecipeRepository.new
 
-artists_repo = ArtistsRespository.new
+recipe = repo.find(2)
 
-artists = artists_repo.all
-
-artists[0].id # =>  1
-artists[0].name # =>  'Pixies'
-artists[0].genre # =>  'rock'
-
-artists[0].id # =>  1
-artists[0].name # =>  'Abba'
-artists[0].genre # =>  'pop'
-
-artists_repo = ArtistsRespository.new
-
-artist = artists_repo.find(2)
-
-artist.id # =>  1
-artist.name # =>  'Abba'
-artist.genre # =>  'pop'
-
-# Add more examples for each method
+recipe.id # =>  2
+recipe.recipe_name # =>  'Fennel Pasta'
+recipe.cooking_time # => '30:00'
+recipe.rating # => 9
 ```
 
 Encode this example as a test.
